@@ -13,7 +13,7 @@ import UserContext from '../context/UserContext';
 
 const Home = ({route}) => {
     const { changeCurrentMenu } = useContext(MenuContext)
-    const {user, users, register, login} = useContext(UserContext)
+    const {user, users, register, login, isLogin} = useContext(UserContext)
     const navigation = useNavigation()
     const [text, setText] = useState('Nobody')
     const [name, setName] = useState('Nobody')
@@ -50,10 +50,16 @@ const Home = ({route}) => {
         }
     }, [route.params])
     
-    const handlePress = () =>{
+    const handlePress = (useremail, username) =>{
         let params = {
             name: "I'm from Home",
-            stockCode: '1234567890'
+            stockCode: '1234567890',
+        }
+        if(!isLogin){
+            if(useremail){
+                params.email = useremail
+                params.username = username
+            }
         }
         changeCurrentMenu({
             name: 'Profile',
@@ -100,9 +106,11 @@ const Home = ({route}) => {
             return
         }
         let registerUsers = await register(data)
-        console.log(registerUsers);
-        Alert.alert("Successful", registerUsers.data[registerUsers.data.length -1])
+        console.log(registerUsers.data);
+        Alert.alert(`Successful Register with ${email}`)
+        handlePress(email, full_name)
     }
+    
     return (
     <FadeInView style={{
         backgroundColor: 'red',
@@ -115,11 +123,12 @@ const Home = ({route}) => {
         }}>
         <Text style={{color:'white'}}>{text}</Text>
         <Text style={{color:'white'}}>{name}</Text>
+        {isLogin ? <Text style={{color:'white'}}>Hi, {user.full_name}({user.email})</Text>:<Text style={{color:'white'}}>Hi, Guest</Text>}
         <TouchableOpacity style={{backgroundColor:'green', paddingHorizontal:30, paddingVertical:15,marginBottom:60}} onPress={handlePress}>
             <Text style={{color:'white', whiteSpace:'nowrap'}}>My Profile</Text>
         </TouchableOpacity>
         {/* <TouchableOpacity style={{backgroundColor:'green', paddingHorizontal:30, paddingVertical:15, marginBottom:60}} onPress={handleStopServer}><Text style={{color:'white', whiteSpace:'nowrap'}}>Stop Server</Text></TouchableOpacity> */}
-        <View>
+        {!isLogin && <View>
         <Text style={{color:'white', whiteSpace:'nowrap', marginBottom:30}}>Simple Register Form</Text>
         <FormInput
             control={control}
@@ -144,7 +153,7 @@ const Home = ({route}) => {
         >
             <Text>Submit</Text>
         </TouchableOpacity>
-        </View>
+        </View>}
         </FadeInView>
     )
 }
