@@ -8,23 +8,23 @@ export const UserProvider = ({ children }) => {
     const [users, setUsers] = useState([]);
     const [user, setUser] = useState({});
     const [isLogin, setIsLogin] = useState(false);
-    const getUsers = async () => {
-        const res = await fetch('http://localhost:8000/info', {
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: 'johndoe@example.com',
-                password: 'password123'
-            })
-        });
-        const data = await res.json();
-        setUsers(data.data)
-    }
-    useEffect(() => {
-        getUsers()
-    }, [])
+    // const getUsers = async () => {
+    //     const res = await fetch('http://localhost:8000/info', {
+    //         method: 'post',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({
+    //             email: 'johndoe@example.com',
+    //             password: 'password123'
+    //         })
+    //     });
+    //     const data = await res.json();
+    //     setUsers(data.data)
+    // }
+    // useEffect(() => {
+    //     getUsers()
+    // }, [])
     const loginNow = (userNow)=>{
         setUser(userNow);
         setIsLogin(true)

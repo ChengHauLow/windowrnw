@@ -2,10 +2,13 @@ import { Text, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Key, useContext } from 'react';
 import MenuContext from '../context/MenuContext';
+import { useDispatch } from 'react-redux';
+import { updatePage } from '../store/GeneralSlice';
 
 const Navbar = () => {
     const { currentMenu, changeCurrentMenu, menu } = useContext(MenuContext)
     const navigation = useNavigation()
+    const dispatch = useDispatch()
     return (
     <View style={{
         backgroundColor: 'blue',
@@ -25,6 +28,7 @@ const Navbar = () => {
                             params:item.params
                         })
                         navigation.navigate(item.name, item.params)
+                        dispatch(updatePage(item.name))
                     }
                 }
             >

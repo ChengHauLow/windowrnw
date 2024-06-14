@@ -1,65 +1,47 @@
-import { View, Text, TouchableOpacity, Alert, TextInput } from 'react-native'
-import {Controller, useForm} from 'react-hook-form'
+import { Text, TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native';
 import FadeInView from '../components/FadeInView';
 import MenuContext from '../context/MenuContext';
-import { useContext, useEffect, useState } from 'react';
-import {z} from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import FormInput from '../components/FormInput';
-import UserContext from '../context/UserContext';
+import { useContext, useEffect } from 'react';
+// import UserContext from '../context/UserContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { logoutUser, setUser } from '../store/UserSlice';
+import { removeAll } from '../store/GeneralSlice';
+import globalWebSocket from '../socket/websocket';
+import { sendMessage } from '../socket/apiStock';
 
 // const socket = new WebSocket('ws://localhost:3000');
-
-const Home = ({route}) => {
-    const { changeCurrentMenu } = useContext(MenuContext)
-    const {user, users, register, login, isLogin} = useContext(UserContext)
-    const navigation = useNavigation()
-    const [text, setText] = useState('Nobody')
-    const [name, setName] = useState('Nobody')
-    // const sendMessage = (message='Hello') => {
-    //     socket.send(JSON.stringify({
-    //         message,
-    //         name: 'Client',
-    //         status: 1
-    //     }))
-    // }
-    // socket.onmessage = (event) => {
-    //     console.log('Message from server ', event.data);
-    //     let data = JSON.parse(event.data);
-    //     if(data.message){
-    //         setText(data.message);
-    //     }
-    // }
-    // sendMessage()
-    // useEffect(() => {
-    //     if(currentMenu.name === 'Home'){
-    //         if(!route.params){
-    //             sendMessage()
-    //         }
-    //     }else if(currentMenu.name === 'Profile'){
-    //         handleStopServer()
-    //     }
-    // },[])
-    useEffect(() => {
-        if(route.params){
-            setName(route.params.name)
-            // if(currentMenu.name === 'Home'){
-            //     sendMessage(route.params.name+'from route Home')
-            // }
+const Home = () => {
+    const dispatch = useDispatch()
+    const { changeCurrentMenu, currentMenu } = useContext(MenuContext)
+    const logedInUser = useSelector(state => state.user)
+    useEffect(()=>{
+        if(currentMenu.name === "Home"){
+            sendMessage(2, {
+                cmd: "user",
+                data: {},
+                status:1
+            })
+            console.log('run here');
         }
-    }, [route.params])
+    },[])
+    console.log(logedInUser, 'from Home');
+    // const {user, users, register, login, isLogin} = useContext(UserContext)
+    const navigation = useNavigation()
+    const handleLogout = ()=>{
+        dispatch(logoutUser())
+        dispatch(removeAll())
+        sendMessage(2, {
+            cmd: "logout",
+            data: {},
+            });
+        globalWebSocket.token = ''
+    }
     
-    const handlePress = (useremail, username) =>{
+    const handlePress = () =>{
         let params = {
             name: "I'm from Home",
             stockCode: '1234567890',
-        }
-        if(!isLogin){
-            if(useremail){
-                params.email = useremail
-                params.username = username
-            }
         }
         changeCurrentMenu({
             name: 'Profile',
@@ -67,48 +49,6 @@ const Home = ({route}) => {
         })
         // handleStopServer()
         navigation.navigate('Profile', params)
-    }
-    // const handleStopServer = () => {
-    //     socket.send(JSON.stringify({
-    //         message: 'Server Stop',
-    //         name: 'Client',
-    //         status: 0
-    //     }))
-    //     return
-    // }
-    const formSchema = z.object({
-        email: z.string().email('Please enter a valid email'),
-        full_name: z.string().min(3, 'full name must be at least 3 characters'),
-        password: z.string().min(8, 'Password must be at least 8 characters'),
-      });
-    const { control, handleSubmit } = useForm({
-        defaultValues: {
-        email: '',
-        full_name: '',
-        password: '',
-        },
-        resolver: zodResolver(formSchema)
-    });
-      
-    const onSubmit = async (data)=>{
-        const { email, full_name, password } = data;
-        if(email == ''){
-            Alert.alert("Error", "Email is required")
-            return
-        }else if(full_name == ''){
-            Alert.alert("Error", "Full name is required")
-            return
-        }else if(password == ''){
-            Alert.alert("Error", "Password is required")
-            return
-        }else if(email == '' && full_name == '' && password == ''){
-            Alert.alert("Error", "Please fill up information.")
-            return
-        }
-        let registerUsers = await register(data)
-        console.log(registerUsers.data);
-        Alert.alert(`Successful Register with ${email}`)
-        handlePress(email, full_name)
     }
     
     return (
@@ -121,39 +61,15 @@ const Home = ({route}) => {
         justifyContent:'center',
         alignItems:'center',
         }}>
-        <Text style={{color:'white'}}>{text}</Text>
-        <Text style={{color:'white'}}>{name}</Text>
-        {isLogin ? <Text style={{color:'white'}}>Hi, {user.full_name}({user.email})</Text>:<Text style={{color:'white'}}>Hi, Guest</Text>}
+        {logedInUser.isLogin ? <Text style={{color:'white'}}>Hi, {logedInUser.name}({logedInUser.user_id})</Text>:<Text style={{color:'white'}}>Hi, Guest</Text>}
         <TouchableOpacity style={{backgroundColor:'green', paddingHorizontal:30, paddingVertical:15,marginBottom:60}} onPress={handlePress}>
             <Text style={{color:'white', whiteSpace:'nowrap'}}>My Profile</Text>
         </TouchableOpacity>
         {/* <TouchableOpacity style={{backgroundColor:'green', paddingHorizontal:30, paddingVertical:15, marginBottom:60}} onPress={handleStopServer}><Text style={{color:'white', whiteSpace:'nowrap'}}>Stop Server</Text></TouchableOpacity> */}
-        {!isLogin && <View>
-        <Text style={{color:'white', whiteSpace:'nowrap', marginBottom:30}}>Simple Register Form</Text>
-        <FormInput
-            control={control}
-            name={'email'}
-            placeholder="email"
-        />
-        <FormInput
-            control={control}
-            name={'full_name'}
-            placeholder='full name'
-        />
-        <FormInput
-            control={control}
-            name={'password'}
-            placeholder='password'
-            secureTextEntry
-        />
-        <TouchableOpacity
-            title='Submit'
-            style={{backgroundColor:'green', paddingHorizontal:30, paddingVertical:15}}
-            onPress={handleSubmit(onSubmit)}
-        >
-            <Text>Submit</Text>
-        </TouchableOpacity>
-        </View>}
+        {logedInUser.isLogin && <>
+            <Text style={{color:'white', whiteSpace:'nowrap'}}>{logedInUser.name}</Text>
+            <TouchableOpacity style={{backgroundColor:'green', paddingHorizontal:30, paddingVertical:15}} onPress={handleLogout}><Text style={{color:'white', whiteSpace:'nowrap'}}>Logout</Text></TouchableOpacity>
+        </>}
         </FadeInView>
     )
 }
