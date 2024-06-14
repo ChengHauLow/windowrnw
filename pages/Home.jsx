@@ -10,6 +10,7 @@ import { removeAll } from '../store/GeneralSlice';
 import globalWebSocket from '../socket/websocket';
 import { sendMessage } from '../socket/apiStock';
 import { subManyEvents, unSubManyEvent } from '../socket/subcribeEvent';
+import { storeData } from '../utils/storage';
 
 // const socket = new WebSocket('ws://localhost:3000');
 const Home = () => {
@@ -61,11 +62,17 @@ const Home = () => {
         sendMessage(2, {
             cmd: "logout",
             data: {},
-            });
+        });
+        changeCurrentMenu({
+            name: 'Home'
+        })
+        storeData('status', 'logout', false)
         globalWebSocket.token = ''
+        
     }
     
     const handlePress = () =>{
+        storeData('fakeToken', '12kl3gh1k2g31i2', false)
         let params = {
             name: "I'm from Home",
             stockCode: '1234567890',

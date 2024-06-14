@@ -8,6 +8,7 @@ import { logoutUser } from '../store/UserSlice';
 import { sendMessage } from '../socket/apiStock.js';
 import { removeAll } from '../store/GeneralSlice';
 import globalWebSocket from '../socket/websocket.js';
+import { getData, storeData } from '../utils/storage.js';
 
 const Profile = ({route}) => {
   const navigation = useNavigation()
@@ -20,6 +21,7 @@ const Profile = ({route}) => {
   if(route.params){
       text = route.params.name?route.params.name:'Profile',
       stockCode = route.params.stockCode?route.params.stockCode:'000000'
+      getData('fakeToken', false).then(data=>console.log(data))
   }
   const handlePress = () =>{
     let params = {
@@ -36,11 +38,15 @@ const Profile = ({route}) => {
 const handleLogoutfromProfile = ()=>{
   dispatch(logoutUser())
   dispatch(removeAll())
+  storeData('status', 'logout', false)
   globalWebSocket.token = ''
   sendMessage(2, {
     cmd: "logout",
     data: {},
   });
+  changeCurrentMenu({
+      name: 'Home'
+  })
 }
 
   return (

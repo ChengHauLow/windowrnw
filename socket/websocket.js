@@ -3,7 +3,6 @@ import manager from "./hub-message.js";
 import socketManager from "./hub.js";
 import { removeAll, updateToken, updatePage, updateMsgTime } from "../store/GeneralSlice.js";
 import { logoutUser, setUser, loginUser } from "../store/UserSlice.js";
-import { useSelector } from "react-redux";
 
 // import { sendMessage } from "./apiStock.js";
 // Create a global WebSocket object
@@ -23,9 +22,16 @@ const globalWebSocket = {
   getloginStatus() {
     return this.loginStatus;
   },
+  isTrusted:true,
+  SendTimeout:1000 * 3000000,
+  ReciveTimeout :1000 * 3000000,
   // Function to connect to the WebSocket server
   connect(storeData, dispatch) {
     if(!storeData) return
+    if(this.socket != null){
+      this.socket.close();
+      this.socket = null;
+    }
     this.msgTime = storeData.msgTime;
     this.socket = new WebSocket(this.url);
     // Event listener for WebSocket connection open
@@ -57,16 +63,14 @@ const globalWebSocket = {
       manager.setPubListStatusFalse();
       setTimeout(() => {
         this.connect();
-      }, 2000);
+      }, 500);
     };
 
     this.socket.onerror = (error) => {
       this.status = false;
       this.loginStatus = false;
       console.log("WebSocket error:", error);
-      setTimeout(() => {
-        this.connect();
-      }, 2000);
+      this.connect();
     };
     this.socket.onmessage = (e) => {
       var data = JSON.parse(e.data);
@@ -146,14 +150,14 @@ const globalWebSocket = {
             // removeStore("token");
             dispatch(removeAll())
             this.token = ''
-            // this.socket.close();
-            this.close()
+            this.socket.close();
+            // this.close()
             // navigate.navigate("Profile");
             // changeCurrentMenu({
             //     name: "Profile"
             // })
             // dispatch(updatePage("Profile"))
-            this.connect();
+            // this.connect();
             manager.subscribe("login", (data) => {});
             manager.subscribe("user", (data) => {});
             manager.subscribe("sms", (data) => {});
@@ -211,17 +215,17 @@ const globalWebSocket = {
   },
 
   send(data) {
-    console.log(data);
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(data));
     } else {
-      console.error("WebSocket connection is not open");
-      this.connect()
+      console.log("WebSocket connection is not open");
+      // this.connect()
+      this.socket.connect()
     }
   },
   close() {
     if (this.socket) {
-      this.socket.close();
+      this.close()
       this.socket = null;
     }
   },
