@@ -1,5 +1,4 @@
-import React from 'react'
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useColorScheme } from 'react-native-windows';
@@ -9,9 +8,8 @@ import { useSelector } from 'react-redux';
 
 const MainApp = () => {
 const isDarkMode = useColorScheme() === 'dark';
-  const user = useSelector(state => state.user);
   const {token} = useSelector(state => state.general);
-  console.log(user);
+  console.log('From MainApp');
   return (
     <View
     style={{

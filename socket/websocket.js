@@ -51,7 +51,6 @@ const globalWebSocket = {
       //   }, 1000);
       // }
     };
-
     this.socket.onclose = () => {
       this.status = false;
       this.loginStatus = false;
@@ -197,12 +196,11 @@ const globalWebSocket = {
         this.msgTime = 0;
         this.loginStatus = false;
         this.token = ''
-        if (this.socket) {
-          this.socket.close();
-          this.connect();
-          manager.subscribe("login", (data) => {});
-          manager.subscribe("sms", (data) => {});
-        }
+        // if (this.socket) {
+        //   this.connect();
+        //   manager.subscribe("login", (data) => {});
+        //   manager.subscribe("sms", (data) => {});
+        // }
         dispatch(logoutUser())
         dispatch(removeAll())
         Alert.alert('已成功退出登入', '已成功退出登入');

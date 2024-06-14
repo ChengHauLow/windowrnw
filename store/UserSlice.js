@@ -33,6 +33,9 @@ const UserSlice = createSlice({
         },
         logoutUser: (state) => {
             state.isLogin = false;
+            state.name = '';
+            state.user_id = '';
+            state.userInfo = {};
         }
     }
 })

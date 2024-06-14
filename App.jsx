@@ -8,9 +8,7 @@ function App(){
   return (
     <Provider store={store}>
       <MenuProvider>
-        <UserProvider>
           <MainApp />
-        </UserProvider>
       </MenuProvider>
     </Provider>
   );
