@@ -60,6 +60,7 @@ const globalWebSocket = {
     this.socket.onclose = () => {
       this.status = false;
       this.loginStatus = false;
+      this.socket = null;
       manager.setPubListStatusFalse();
       setTimeout(() => {
         this.connect();
@@ -70,6 +71,7 @@ const globalWebSocket = {
       this.status = false;
       this.loginStatus = false;
       console.log("WebSocket error:", error);
+      this.socket = null;
       this.connect();
     };
     this.socket.onmessage = (e) => {
